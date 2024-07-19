@@ -1,35 +1,40 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useMemo } from 'react';
+import './App.css';
+import useStopwatch from './hooks/useStopwatch';
+import { useCallback } from 'react';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const { time, stopTime, isRunning, startPause, reset, stop } = useStopwatch();
+
+  const formatTime = useCallback((time) => {
+    const minutes = ("0" + Math.floor((time / 60000) % 60)).slice(-2);
+    const seconds = ("0" + Math.floor((time / 1000) % 60)).slice(-2);
+    const milliseconds = ("0" + ((time / 10) % 100)).slice(-2);
+    return `${minutes}:${seconds}.${milliseconds}`;
+  })
+
+  const formattedTime = useMemo(() => {
+    return formatTime(time)
+  }, [time]);
+
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="App">
+      <div className="stopwatch">
+        <h1>Stopwatch</h1>
+        <div className="time-display">{formattedTime}</div>
+        <div className="buttons">
+          <button onClick={startPause}>{isRunning ? 'Pause' : 'Start'}</button>
+          <button onClick={stop}>Stop</button>
+          <button onClick={reset}>Reset</button>
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+        {stopTime !== 0 && <div className='stop-display'>
+          <p>Stopped at</p>
+          {formatTime(stopTime)}
+        </div>}
+    </div>
+  );
+};
 
-export default App
+export default App;
